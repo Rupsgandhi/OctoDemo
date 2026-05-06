@@ -138,6 +138,20 @@ export class ProductsRepository {
       handleDatabaseError(error);
     }
   }
+
+  /**
+   * Find products where current stock is below reorder level
+   */
+  async findLowStock(): Promise<Pick<Product, 'productId' | 'name' | 'stockLevel' | 'reorderLevel'>[]> {
+    try {
+      const rows = await this.db.all<DatabaseRow>(
+        'SELECT product_id, name, stock_level, reorder_level FROM products WHERE stock_level < reorder_level ORDER BY name',
+      );
+      return mapDatabaseRows(rows);
+    } catch (error) {
+      handleDatabaseError(error);
+    }
+  }
 }
 
 // Factory function to create repository instance

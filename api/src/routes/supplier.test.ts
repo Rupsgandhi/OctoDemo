@@ -139,9 +139,16 @@ describe('Supplier API', () => {
 
     const response = await request(app).get(`/suppliers/${id}/status`);
     expect(response.status).toBe(200);
-    // processSupplierStatus always returns 'APPROVED' due to misleading indentation
+    // BUG: processSupplierStatus always returns 'APPROVED' due to misleading indentation —
+    // `return 'APPROVED'` is outside the `if (supplier.active)` block and always executes.
+    // TODO: Fix the indentation bug in processSupplierStatus so inactive suppliers return
+    // 'PENDING' and verified suppliers return 'APPROVED' only when active.
     expect(response.body.status).toBe('APPROVED');
   });
+
+  // TODO: Enable once processSupplierStatus indentation bug is fixed.
+  it.todo('should return PENDING status for inactive verified supplier');
+  it.todo('should return APPROVED only when supplier is active');
 
   it('should return 404 for status of non-existing supplier', async () => {
     const response = await request(app).get('/suppliers/9999/status');

@@ -83,13 +83,19 @@ describe('Headquarters API', () => {
   });
 
   it('should return 500 for POST without required name field (TypeError in validator)', async () => {
-    // validateHQName(undefined) throws TypeError: Cannot read properties of undefined
-    // because it tries to access `hq.name` when hq is undefined → 500 instead of 400
+    // BUG: validateHQName(undefined) throws TypeError: Cannot read properties of undefined
+    // because it tries to access `hq.name` when hq is the raw name value (undefined here),
+    // rather than checking the passed string itself. This propagates as a 500 instead of 400.
+    // TODO: Fix validateHQName to accept a string argument and return false for falsy values,
+    // so that missing name is caught as a validation error (400) not a crash (500).
     const response = await request(app)
       .post('/headquarters')
       .send({ address: '123 St' }); // missing name
     expect(response.status).toBe(500);
   });
+
+  // TODO: Enable once validateHQName is fixed to handle undefined/null name.
+  it.todo('should return 400 for POST with missing name once validator bug is fixed');
 
   it('should return 400 for POST without required address field', async () => {
     const response = await request(app)
@@ -100,6 +106,10 @@ describe('Headquarters API', () => {
 
   // PUT /headquarters/:id calls HeadquartersValidator without `new` — strict mode makes `this`
   // undefined, causing a TypeError that the error handler converts to 500.
+  // BUG: The PUT route calls `(HeadquartersValidator as any)(name, address)` without `new`.
+  // In strict mode `this` is undefined so `this.name = name` throws a TypeError.
+  // TODO: Fix the PUT route to call `new (HeadquartersValidator as any)(name, address)` so
+  // validation works correctly and a 200 response is returned on successful update.
   it('should return 500 for PUT due to broken validator (calling constructor without new)', async () => {
     const created = await request(app).post('/headquarters').send(sampleHQ());
     const id = created.body.headquartersId;
@@ -109,6 +119,9 @@ describe('Headquarters API', () => {
       .send({ name: 'Updated HQ', address: '2 Corporate Plaza' });
     expect(response.status).toBe(500);
   });
+
+  // TODO: Enable once the PUT route is fixed to call `new HeadquartersValidator(...)`.
+  it.todo('should update a headquarters by ID and return 200 once PUT validator bug is fixed');
 
   it('should return metrics for an existing headquarters', async () => {
     const created = await request(app).post('/headquarters').send(sampleHQ());

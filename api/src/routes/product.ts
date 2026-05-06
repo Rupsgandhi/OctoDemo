@@ -97,6 +97,29 @@
  *         description: Product deleted successfully
  *       404:
  *         description: Product not found
+ *
+ * /api/products/name/{name}:
+ *   get:
+ *     summary: Search products by name (partial match)
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product name (partial match)
+ *     responses:
+ *       200:
+ *         description: List of matching products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: No products found matching the given name
  */
 
 import express from 'express';
@@ -143,15 +166,15 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// Get a product by name
+// Search products by name (partial match)
 router.get('/name/:name', async (req, res, next) => {
   try {
     const repo = await getProductsRepository();
-    const product = await repo.findByName(req.params.name);
-    if (product) {
-      res.json(product);
+    const products = await repo.findByName(req.params.name);
+    if (products.length === 0) {
+      res.status(404).send('No products found matching the given name');
     } else {
-      res.status(404).send('Product not found');
+      res.json(products);
     }
   } catch (error) {
     next(error);

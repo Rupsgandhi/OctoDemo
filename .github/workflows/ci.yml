@@ -17,7 +17,7 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       
     - name: Setup Node.js 24
       uses: actions/setup-node@v6
@@ -50,7 +50,7 @@ jobs:
 
     - name: Upload Coverage Reports
       if: always()
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v7
       with:
         name: coverage-reports-backend
         path: |
@@ -64,7 +64,7 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       
     - name: Setup Node.js 24
       uses: actions/setup-node@v6
@@ -97,10 +97,10 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Download Coverage Reports
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: coverage-reports-backend
         path: api/coverage/
@@ -109,7 +109,7 @@ jobs:
         
     - name: Generate Reports and Comment
       if: always()
-      uses: actions/github-script@v8
+      uses: actions/github-script@v9.0.0
       with:
         script: |
           const fs = require('fs');
